@@ -13,4 +13,4 @@ class AnswerTicketSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['id','question','auther','text','date']
         model = TicketAnswer
-        read_only_fields =['id','question','auther','date']
+        read_only_fields =['id','auther','date']
