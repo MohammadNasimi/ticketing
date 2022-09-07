@@ -136,13 +136,13 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
         else:
             return response.Response({'detail':'you cant show this question'},status=status.HTTP_403_FORBIDDEN)
         
-    @swagger_auto_schema(operation_description=docs.question_update_retrieve,tags=['ticket'])   
+    @swagger_auto_schema(operation_description=docs.question_update_retrieve,tags=['ticketing'])   
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
-    @swagger_auto_schema(operation_description=docs.question_update_update,tags=['ticket'])   
+    @swagger_auto_schema(operation_description=docs.question_update_update,tags=['ticketing'])   
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
-    @swagger_auto_schema(operation_description=docs.question_update_destroy,tags=['ticket'])   
+    @swagger_auto_schema(operation_description=docs.question_update_destroy,tags=['ticketing'])   
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
@@ -165,7 +165,6 @@ class UpdateTicktetAnswerView(RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         # serializer.data['auther'] = instance.auther.id
         # print(serializer.data)
-        print(instance)
         if self.request.user == instance.auther:
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer,instance)
