@@ -36,11 +36,11 @@ class CreateQuestionView(ListCreateAPIView):
             queryset = queryset.order_by('-date')  # use -data ASC and data DESC
             
         return queryset
-    @swagger_auto_schema(operation_description=docs.question_list_get,tags=['ticket'],
+    @swagger_auto_schema(operation_description=docs.question_list_get,tags=['ticketing'],
                          manual_parameters=[params.date,params.customer,params.type])
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-    @swagger_auto_schema(operation_description=docs.question_list_post,tags=['ticket'])   
+    @swagger_auto_schema(operation_description=docs.question_list_post,tags=['ticketing'])   
     def post(self, request, *args, **kwargs):
         if self.request.user:
             return self.create(request, *args, **kwargs)
