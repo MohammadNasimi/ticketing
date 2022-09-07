@@ -78,6 +78,8 @@ model update:
 {
     "title": "title",
     "body": "body"
+    "type": "type"
+
 }
 
 """
@@ -97,7 +99,8 @@ answer_update_update="""
 model update:
 
 {
-    "comment": "comment",
+    "question":"question"
+    "text": "text",
 }
 
 """
