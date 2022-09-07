@@ -74,28 +74,27 @@ class CraetaAnswerView(ListCreateAPIView):
                return TicketAnswer.objects.none()
             
         if date_sort is not None:
-            queryset = queryset.order_by('-date_question')  # use -data ASC and data DESC
+            queryset = queryset.order_by('-date')  # use -data ASC and data DESC
         
         return queryset
-    @swagger_auto_schema(operation_description=docs.answer_list_get,tags=['ticket'],manual_parameters =[params.date,params.question])
+    @swagger_auto_schema(operation_description=docs.answer_list_get,tags=['ticketing'],manual_parameters =[params.date,params.question])
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-    @swagger_auto_schema(operation_description=docs.answer_list_post,tags=['ticket'])
+    @swagger_auto_schema(operation_description=docs.answer_list_post,tags=['ticketing'])
     def post(self, request, *args, **kwargs):
-        question_id = self.request.GET.get('question')
-        question_request =Ticket.objects.get(id =question_id) 
-
+        question_id = self.request.data.get("question")
+        question_request =Ticket.objects.get(id =question_id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         if question_request.auther ==  self.request.user or self.request.user.type == '1':
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
             self.perform_create(serializer,question_request)
             headers = self.get_success_headers(serializer.data)
             return response.Response(serializer.data, status=200, headers=headers)
         else:
-            return response.Response({'detail':'you cant'},status=status.HTTP_403_FORBIDDEN)
+            return response.Response({'detail':'you cant answer this question'},status=status.HTTP_403_FORBIDDEN)
         
     def perform_create(self, serializer,question_request):
-        serializer.save(question = question_request,auther_question = self.request.user)
+        serializer.save(question = question_request,auther = self.request.user)
 
 #####################update_delete##########################
 class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
