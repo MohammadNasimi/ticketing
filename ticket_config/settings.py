@@ -95,11 +95,11 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ticket',
-        'USER': 'ticketuser',
+        'NAME': config('name'),
+        'USER': config('user'),
         'PASSWORD': config('PASSWORD'),
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'HOST': config('host'),
+        'PORT': config('port'),
     }
 }
 
