@@ -39,13 +39,19 @@ class CreateQuestionView(ListCreateAPIView):
     @swagger_auto_schema(operation_description=docs.question_list_get,tags=['ticketing'],
                          manual_parameters=[params.date,params.customer,params.type])
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        try:
+            return self.list(request, *args, **kwargs)
+        except:
+            return response.Response({'detail':"id ticket not exist"},status=status.HTTP_400_BAD_REQUEST)
     @swagger_auto_schema(operation_description=docs.question_list_post,tags=['ticketing'])   
     def post(self, request, *args, **kwargs):
-        if self.request.user:
-            return self.create(request, *args, **kwargs)
-        else:
-            return response.Response({'detail':'you cant'},status=status.HTTP_403_FORBIDDEN)
+        try:
+            if self.request.user:
+                return self.create(request, *args, **kwargs)
+            else:
+                return response.Response({'detail':'you cant'},status=status.HTTP_403_FORBIDDEN)
+        except:
+            return response.Response({'detail':'اطلاعات ارسالی کافی نیست'},status=status.HTTP_400_BAD_REQUEST)
     
     def perform_create(self, serializer):
         serializer.save(auther = self.request.user)
@@ -63,15 +69,17 @@ class CraetaAnswerView(ListCreateAPIView):
             if question_id == None :
                 queryset= TicketAnswer.objects.all()
             else:
-
                 queryset= TicketAnswer.objects.filter(question = question_id)
         else:
-           question_request =Ticket.objects.get(id = question_id) 
-
-           if question_request.auther ==  self.request.user:
-                queryset= TicketAnswer.objects.filter(question = question_id)
+           if question_id == None:
+                queryset= TicketAnswer.objects.filter(question__auther=self.request.user)   
            else:
-               return TicketAnswer.objects.none()
+                question_request =Ticket.objects.get(id = question_id) 
+
+                if question_request.auther ==  self.request.user:
+                        queryset= TicketAnswer.objects.filter(question = question_id)
+                else:
+                    return TicketAnswer.objects.none()
             
         if date_sort is not None:
             queryset = queryset.order_by('-date')  # use -data ASC and data DESC
@@ -79,19 +87,25 @@ class CraetaAnswerView(ListCreateAPIView):
         return queryset
     @swagger_auto_schema(operation_description=docs.answer_list_get,tags=['ticketing'],manual_parameters =[params.date,params.question])
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        try:
+            return self.list(request, *args, **kwargs)
+        except:
+            return response.Response({'detail':"id ticket not exist"},status=status.HTTP_400_BAD_REQUEST)
     @swagger_auto_schema(operation_description=docs.answer_list_post,tags=['ticketing'])
     def post(self, request, *args, **kwargs):
-        question_id = self.request.data.get("question")
-        question_request =Ticket.objects.get(id =question_id)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if question_request.auther ==  self.request.user or self.request.user.type == '1':
-            self.perform_create(serializer,question_request)
-            headers = self.get_success_headers(serializer.data)
-            return response.Response(serializer.data, status=200, headers=headers)
-        else:
-            return response.Response({'detail':'you cant answer this question'},status=status.HTTP_403_FORBIDDEN)
+        try:
+            question_id = self.request.data.get("question")
+            question_request =Ticket.objects.get(id =question_id)
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            if question_request.auther ==  self.request.user or self.request.user.type == '1':
+                self.perform_create(serializer,question_request)
+                headers = self.get_success_headers(serializer.data)
+                return response.Response(serializer.data, status=200, headers=headers)
+            else:
+                return response.Response({'detail':'you cant answer this question'},status=status.HTTP_403_FORBIDDEN)
+        except:
+            return response.Response({'detail':'اطلاعات ارسالی کافی نیست'},status=status.HTTP_400_BAD_REQUEST)
         
     def perform_create(self, serializer,question_request):
         serializer.save(question = question_request,auther = self.request.user)
@@ -103,7 +117,8 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        if self.request.user.id == serializer.data['auther'] or self.request.user.type == '1':
+
+        if self.request.user.id == serializer.data['auther']['id'] or self.request.user.type == '1':
             return response.Response(serializer.data)
         else:
             return response.Response({'detail':'you cant show this question'},status=status.HTTP_403_FORBIDDEN)
@@ -153,7 +168,7 @@ class UpdateTicktetAnswerView(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         print(instance.auther)
-        if self.request.user.id == serializer.data['auther'] or self.request.user.type == '1':
+        if self.request.user.id == serializer.data['auther']['id'] or self.request.user.type == '1':
             return response.Response(serializer.data)
         else:
             return response.Response({'detail':'you cant show this question'},status=status.HTTP_403_FORBIDDEN)
