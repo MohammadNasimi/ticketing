@@ -1,4 +1,5 @@
 from genericpath import exists
+from urllib import response
 from rest_framework import permissions
 from rest_framework.generics import CreateAPIView
 from accounts.models import CustomerUser # If used custom user model
@@ -21,6 +22,8 @@ class MyTokenObtainPairView(generics.GenericAPIView):
     queryset = CustomerUser.objects.all()
     serializer_class = LoginSerializer
     def post(self, request, *args, **kwargs):
+        if "password" not in request.data or "username" not in request.data:
+            return Response({"detail": "اطلاعات ارسالی کامل نیست."} , status=status.HTTP_400_BAD_REQUEST)
         def get_token(user):
                 refresh = RefreshToken.for_user(user)
                 return {
@@ -29,7 +32,6 @@ class MyTokenObtainPairView(generics.GenericAPIView):
                 }
 
         user = authenticate(username = request.data['username'],password = request.data['password'])
-        print(user)
         if user :
             token=get_token(user)
             data =LoginSerializer(user).data
@@ -40,6 +42,3 @@ class MyTokenObtainPairView(generics.GenericAPIView):
 
         else:
             return Response({'user':'wrong username or password'}, status=status.HTTP_200_OK)
-
-
-    
