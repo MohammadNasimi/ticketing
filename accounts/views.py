@@ -1,5 +1,3 @@
-from genericpath import exists
-from urllib import response
 from rest_framework import permissions
 from rest_framework.generics import CreateAPIView
 from accounts.models import CustomerUser # If used custom user model
@@ -16,7 +14,12 @@ class CreateUserView(CreateAPIView):
         permissions.AllowAny # Or anon users can't register
     ]
     serializer_class = UserSerializer
-
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            return self.create(request, *args, **kwargs)
+        except:
+            return Response({'detail':'اطلاعات کافی نیست'},status=status.HTTP_400_BAD_REQUEST)
  
 class MyTokenObtainPairView(generics.GenericAPIView):
     queryset = CustomerUser.objects.all()
