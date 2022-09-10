@@ -127,8 +127,6 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        # serializer.data['auther'] = instance.auther.id
-        # print(serializer.data)
         if self.request.user == instance.auther:
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
@@ -138,7 +136,7 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
                 instance._prefetched_objects_cache = {}
             return response.Response(serializer.data)
         else:
-            return response.Response({'detail':'you cant show this question'},status=status.HTTP_403_FORBIDDEN)
+            return response.Response({'detail':'you cant update this question'},status=status.HTTP_403_FORBIDDEN)
     def perform_update(self, serializer):
         serializer.save(auther = self.request.user)
         
@@ -149,25 +147,31 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
             self.perform_destroy(instance)
             return response.Response(status=status.HTTP_204_NO_CONTENT)
         else:
-            return response.Response({'detail':'you cant show this question'},status=status.HTTP_403_FORBIDDEN)
+            return response.Response({'detail':'you cant delete this question'},status=status.HTTP_403_FORBIDDEN)
         
     @swagger_auto_schema(operation_description=docs.question_update_retrieve,tags=['ticketing'])   
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
     @swagger_auto_schema(operation_description=docs.question_update_update,tags=['ticketing'])   
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        try:
+            return self.update(request, *args, **kwargs)
+        except:
+            return response.Response({'detail':'id Ticket does not exist'},status=status.HTTP_400_BAD_REQUEST)
     @swagger_auto_schema(operation_description=docs.question_update_destroy,tags=['ticketing'])   
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+        try:
+            return self.destroy(request, *args, **kwargs)
+        except:
+            return response.Response({'detail':'id Ticket does not exist'},status=status.HTTP_400_BAD_REQUEST)
 
+            
 class UpdateTicktetAnswerView(RetrieveUpdateDestroyAPIView):
     queryset = TicketAnswer.objects.all()
     serializer_class = AnswerTicketSerializer
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        print(instance.auther)
         if self.request.user.id == serializer.data['auther']['id'] or self.request.user.type == '1':
             return response.Response(serializer.data)
         else:
@@ -207,7 +211,13 @@ class UpdateTicktetAnswerView(RetrieveUpdateDestroyAPIView):
         return self.retrieve(request, *args, **kwargs)
     @swagger_auto_schema(operation_description=docs.answer_update_update,tags=['ticketing'])   
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        try:
+            return self.update(request, *args, **kwargs)
+        except:
+            return response.Response({'detail':'id Ticket does not exist'},status=status.HTTP_400_BAD_REQUEST)
     @swagger_auto_schema(operation_description=docs.answer_update_destroy,tags=['ticketing'])   
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+        try:
+            return self.destroy(request, *args, **kwargs)
+        except:
+            return response.Response({'detail':'id TicketAnswer does not exist'},status=status.HTTP_400_BAD_REQUEST)
