@@ -39,7 +39,11 @@ class CreateQuestionView(ListCreateAPIView):
 
     @swagger_auto_schema(operation_description=docs.question_list_post,tags=['ticketing'])   
     def post(self, request, *args, **kwargs):
-            return self.create(request, *args, **kwargs)
+            if self.request.user.type =='2':
+                return self.create(request, *args, **kwargs)
+            else:
+                return response.Response({'detail':'admin couldnt create ticket'},status=status.HTTP_400_BAD_REQUEST)
+            
     
     def perform_create(self, serializer):
         serializer.save(auther_id = self.request.user.id)
@@ -131,6 +135,7 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
 
             
 class UpdateTicktetAnswerView(RetrieveUpdateDestroyAPIView):
+    permission_classes =[IsAuthenticated]
     serializer_class = AnswerTicketSerializer
     def get_queryset(self):
         if  self.request.user.type == '1':
