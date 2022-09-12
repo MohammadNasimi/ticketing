@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ticketing.models import Ticket,TicketAnswer
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer,Customerserilizer
 
 class AnswerTicketSerializer(serializers.ModelSerializer):
     auther = UserSerializer(read_only=True)
@@ -11,7 +11,7 @@ class AnswerTicketSerializer(serializers.ModelSerializer):
         read_only_fields =['id','question','auther','date']
         
 class QuestionTicketSerializer(serializers.ModelSerializer):
-    auther = UserSerializer(read_only=True)
+    auther = Customerserilizer(read_only=True)
     ticket_answer_obj = serializers.SerializerMethodField('get_ticket_answer_obj')
 
     class Meta:
