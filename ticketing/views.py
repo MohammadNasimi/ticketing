@@ -1,6 +1,7 @@
 from genericpath import exists
 from django.http import HttpResponse
 from  rest_framework.generics import ListCreateAPIView ,RetrieveUpdateDestroyAPIView
+from accounts.models import Customer
 from ticketing.serializers import QuestionTicketSerializer,AnswerTicketSerializer
 # Create your views here.
 from rest_framework import response,status
@@ -17,14 +18,15 @@ class CreateQuestionView(ListCreateAPIView):
         user = self.request.user
         type_ = self.request.GET.get('type')
         date_sort = self.request.GET.get('date')
+        print(Ticket.objects.filter(auther__user_id=1))
         if user.type == '1':
             customer_id = self.request.GET.get('customer')
             if customer_id == None :
                 queryset= Ticket.objects.all()
             else:
-                queryset= Ticket.objects.filter(auther_id = customer_id)
+                queryset= Ticket.objects.filter(auther__user_id = customer_id)
         else:
-            queryset= Ticket.objects.filter(auther_id=user.id)
+            queryset= Ticket.objects.filter(auther__user_id=user.id)
             # return response.Response({'detail':'you cant'},status=status.HTTP_403_FORBIDDEN)            
         if type_ is not None:
             queryset = queryset.filter(type= type_)
@@ -46,9 +48,13 @@ class CreateQuestionView(ListCreateAPIView):
             
     
     def perform_create(self, serializer):
-        serializer.save(auther_id = self.request.user.id)
+        customer = Customer.objects.all()
+        for customer in customer:
+            if customer.user.id == self.request.user.id:
+                customer_id = customer.id
+        serializer.save(auther_id = customer_id)
 
-    
+     
 class CraetaAnswerView(ListCreateAPIView):
     permission_classes =[IsAuthenticated]
     serializer_class = AnswerTicketSerializer
@@ -64,7 +70,7 @@ class CraetaAnswerView(ListCreateAPIView):
             except Ticket.DoesNotExist:
                 return TicketAnswer.objects.none()
             
-            if ticket_obj.auther ==  self.request.user:
+            if ticket_obj.auther.user ==  self.request.user:
                 queryset= TicketAnswer.objects.filter(question_id = ticket_id)
             
         if date_sort is not None:
@@ -76,6 +82,7 @@ class CraetaAnswerView(ListCreateAPIView):
             return self.list(request, *args, **kwargs)
     @swagger_auto_schema(operation_description=docs.answer_list_post,tags=['ticketing'])
     def post(self, request, *args, **kwargs):
+        
             ticket_id = self.kwargs['ticket_id']
             try:
                 question = Ticket.objects.get(id =ticket_id)
@@ -84,7 +91,7 @@ class CraetaAnswerView(ListCreateAPIView):
 
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            if question.auther ==  self.request.user or self.request.user.type == '1':
+            if question.auther.user ==  self.request.user or self.request.user.type == '1':
                 self.perform_create(serializer,question)
                 headers = self.get_success_headers(serializer.data)
                 return response.Response(serializer.data, status=200, headers=headers)
@@ -101,7 +108,7 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
         if  self.request.user.type == '1':
             queryset = Ticket.objects.all()
         else:
-            queryset= Ticket.objects.filter(auther_id =self.request.user.id )
+            queryset= Ticket.objects.filter(auther__user_id =self.request.user.id )
             # return response.Response({'detail':'you cant'},status=status.HTTP_403_FORBIDDEN)            
         return queryset
         
@@ -109,7 +116,7 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        if self.request.user == instance.auther:
+        if self.request.user == instance.auther.user:
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
             if getattr(instance, '_prefetched_objects_cache', None):
@@ -120,7 +127,7 @@ class UpdateTicktetView(RetrieveUpdateDestroyAPIView):
         else:
             return response.Response({'detail':'you cant update this question'},status=status.HTTP_403_FORBIDDEN)
     def perform_update(self, serializer):
-        serializer.save(auther = self.request.user)
+        serializer.save(auther__user_id = self.request.user.id)
         
         
     @swagger_auto_schema(operation_description=docs.question_update_retrieve,tags=['ticketing'])   
