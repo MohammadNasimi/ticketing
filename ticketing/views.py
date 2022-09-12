@@ -18,7 +18,6 @@ class CreateQuestionView(ListCreateAPIView):
         user = self.request.user
         type_ = self.request.GET.get('type')
         date_sort = self.request.GET.get('date')
-        print(Ticket.objects.filter(auther__user_id=1))
         if user.type == '1':
             customer_id = self.request.GET.get('customer')
             if customer_id == None :
@@ -48,11 +47,8 @@ class CreateQuestionView(ListCreateAPIView):
             
     
     def perform_create(self, serializer):
-        customer = Customer.objects.all()
-        for customer in customer:
-            if customer.user.id == self.request.user.id:
-                customer_id = customer.id
-        serializer.save(auther_id = customer_id)
+        customer = Customer.objects.get(user_id = self.request.user.id)
+        serializer.save(auther_id = customer.id)
 
      
 class CraetaAnswerView(ListCreateAPIView):
@@ -72,6 +68,8 @@ class CraetaAnswerView(ListCreateAPIView):
             
             if ticket_obj.auther.user ==  self.request.user:
                 queryset= TicketAnswer.objects.filter(question_id = ticket_id)
+            else:
+                queryset = TicketAnswer.objects.none()
             
         if date_sort is not None:
             queryset = queryset.order_by('-date')  # use -data ASC and data DESC
