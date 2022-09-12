@@ -1,6 +1,6 @@
 from operator import mod
 from django.db import models
-from accounts.models import CustomerUser
+from accounts.models import Customer,User
 # Create your models here.
 Choices_type =(
     ( '1','Financial'),
@@ -10,7 +10,7 @@ Choices_type =(
 )
 class Ticket(models.Model):
     title = models.CharField(max_length=20)
-    auther = models.ForeignKey(CustomerUser,on_delete=models.CASCADE)
+    auther = models.ForeignKey(Customer,on_delete=models.CASCADE)
     text = models.TextField()
     date =models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=2,choices = Choices_type, default= '4')
@@ -21,7 +21,7 @@ class Ticket(models.Model):
 
 class TicketAnswer(models.Model):
     question = models.ForeignKey(Ticket,on_delete=models.CASCADE)
-    auther = models.ForeignKey(CustomerUser,on_delete=models.CASCADE)
+    auther = models.ForeignKey(User,on_delete=models.CASCADE)
     text = models.TextField()
     date =models.DateTimeField(auto_now_add=True)
 
