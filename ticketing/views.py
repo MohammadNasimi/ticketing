@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from ticketing.models import Ticket,TicketAnswer
 from ticketing import docs ,params
 from drf_yasg.utils import swagger_auto_schema
-
+from datetime import date,datetime
 
 class CreateQuestionView(ListCreateAPIView):
     permission_classes =[IsAuthenticated]
@@ -30,8 +30,13 @@ class CreateQuestionView(ListCreateAPIView):
         if type_ is not None:
             queryset = queryset.filter(type= type_)
         if date_sort is not None:
-            queryset = queryset.order_by('-date')  # use -data ASC and data DESC
-            
+            try:
+                date_split=date_sort.split('-')
+                date_start = date(int(date_split[0]),int(date_split[1]), int(date_split[2]))
+                # queryset = queryset.order_by('-date')  # use -data ASC and data DESC
+                queryset=queryset.filter(date__gte=date_start,date__lte =datetime.now())
+            except:
+                return response.Response({'detail':'year-mounth-day like ==>2021-12-2','condition':'mounth<=12 and day<=31'})
         return queryset
     @swagger_auto_schema(operation_description=docs.question_list_get,tags=['ticketing'],
                          manual_parameters=[params.date,params.customer,params.type])
@@ -72,8 +77,14 @@ class CraetaAnswerView(ListCreateAPIView):
                 queryset = TicketAnswer.objects.none()
             
         if date_sort is not None:
-            queryset = queryset.order_by('-date')  # use -data ASC and data DESC
-        
+            # queryset = queryset.order_by('-date')  # use -data ASC and data DESC
+            try:
+                date_split=date_sort.split('-')
+                date_start = date(int(date_split[0]),int(date_split[1]), int(date_split[2]))
+                queryset=queryset.filter(date__gte=date_start,date__lte =datetime.now())
+            except:
+                return response.Response({'detail':'year-mounth-day like ==>2021-12-2','condition':'mounth<=12 and day<=31'})
+                        
         return queryset
     @swagger_auto_schema(operation_description=docs.answer_list_get,tags=['ticketing'],manual_parameters =[params.date,params.question])
     def get(self, request, *args, **kwargs):
