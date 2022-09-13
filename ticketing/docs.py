@@ -15,6 +15,7 @@ Ticket Model:
         ('3','holiday'),
         ('4','Others')
         )
+        ticket_answer_obj: لیست پاسخ های این تیکت
         
 params:
 customer
@@ -22,7 +23,7 @@ customer
 type
 ادمین یا کاربر به تایپ های مد نظر خود از تیکت ها دسترسی دارد
 date
-بر اساس تاریخ ساخت تیکت ان ها را مرتب می کند
+بر اساس تاریخ ساخت تیکت ان ها را بعد ان تاریخ نشان می کند
 
 """
 
@@ -55,9 +56,9 @@ params :
 TicketAnswer Model:
 {
     question = ای دی تیکت مد نظر
-    auther_question = نویسنده این پاسخ برای تیکت
-    comment = متن پاسخ تیکت
-    date_question =تاریخ
+    authern = نویسنده این پاسخ برای تیکت
+    text = متن پاسخ تیکت
+    date =تاریخ
 }
 """
 
@@ -99,7 +100,6 @@ answer_update_update="""
 model update:
 
 {
-    "question":"question"
     "text": "text",
 }
 
