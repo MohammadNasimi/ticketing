@@ -1,5 +1,3 @@
-from genericpath import exists
-from django.http import HttpResponse
 from  rest_framework.generics import ListCreateAPIView ,RetrieveUpdateDestroyAPIView
 from accounts.models import Customer
 from ticketing.serializers import QuestionTicketSerializer,AnswerTicketSerializer
@@ -10,9 +8,9 @@ from ticketing.models import Ticket,TicketAnswer
 from ticketing import docs ,params
 from drf_yasg.utils import swagger_auto_schema
 from datetime import date,datetime
-
+from ticketing.permissions import Ticketpermissions
 class CreateQuestionView(ListCreateAPIView):
-    permission_classes =[IsAuthenticated]
+    permission_classes =[IsAuthenticated,Ticketpermissions]
     serializer_class = QuestionTicketSerializer
     def get_queryset(self):
         user = self.request.user
@@ -45,10 +43,7 @@ class CreateQuestionView(ListCreateAPIView):
 
     @swagger_auto_schema(operation_description=docs.question_list_post,tags=['ticketing'])   
     def post(self, request, *args, **kwargs):
-            if self.request.user.type =='2':
                 return self.create(request, *args, **kwargs)
-            else:
-                return response.Response({'detail':'admin couldnt create ticket'},status=status.HTTP_400_BAD_REQUEST)
             
     
     def perform_create(self, serializer):
@@ -104,6 +99,9 @@ class CraetaAnswerView(ListCreateAPIView):
                 self.perform_create(serializer,question)
                 headers = self.get_success_headers(serializer.data)
                 return response.Response(serializer.data, status=200, headers=headers)
+            else:
+                return response.Response({'detail':'you cant answer this ticket'},status=status.HTTP_400_BAD_REQUEST)
+
 
         
     def perform_create(self, serializer,question):
