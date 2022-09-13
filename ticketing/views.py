@@ -15,7 +15,8 @@ class CreateQuestionView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         type_ = self.request.GET.get('type')
-        date_sort = self.request.GET.get('date')
+        datefirst = self.request.GET.get('datefirst')
+        dateend = self.request.GET.get('dateend')
         if user.type == '1':
             customer_id = self.request.GET.get('customer')
             if customer_id == None :
@@ -27,14 +28,13 @@ class CreateQuestionView(ListCreateAPIView):
             # return response.Response({'detail':'you cant'},status=status.HTTP_403_FORBIDDEN)            
         if type_ is not None:
             queryset = queryset.filter(type= type_)
-        if date_sort is not None:
-            try:
-                date_split=date_sort.split('-')
-                date_start = date(int(date_split[0]),int(date_split[1]), int(date_split[2]))
-                # queryset = queryset.order_by('-date')  # use -data ASC and data DESC
-                queryset=queryset.filter(date__gte=date_start,date__lte =datetime.now())
-            except:
-                return response.Response({'detail':'year-mounth-day like ==>2021-12-2','condition':'mounth<=12 and day<=31'})
+        if datefirst is not None and dateend is not None:
+            # queryset = queryset.order_by('-date')  # use -data ASC and data DESC
+            queryset=queryset.filter(date__gte=date.fromisoformat(datefirst),date__lte =dateend)
+        elif  datefirst is not None:
+            queryset=queryset.filter(date__gte=date.fromisoformat(datefirst))
+        elif  dateend is not None:
+            queryset=queryset.filter(date__lte =date.fromisoformat(dateend))
         return queryset
     @swagger_auto_schema(operation_description=docs.question_list_get,tags=['ticketing'],
                          manual_parameters=[params.date,params.customer,params.type])
@@ -57,7 +57,9 @@ class CraetaAnswerView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         ticket_id = self.kwargs['ticket_id']
-        date_sort = self.request.GET.get('date')
+        datefirst = self.request.GET.get('datefirst')
+        dateend = self.request.GET.get('dateend')
+
         if user.type == '1':
             queryset= TicketAnswer.objects.filter(question_id = ticket_id)
         else:
@@ -71,15 +73,13 @@ class CraetaAnswerView(ListCreateAPIView):
             else:
                 queryset = TicketAnswer.objects.none()
             
-        if date_sort is not None:
+        if datefirst is not None and dateend is not None:
             # queryset = queryset.order_by('-date')  # use -data ASC and data DESC
-            try:
-                date_split=date_sort.split('-')
-                date_start = date(int(date_split[0]),int(date_split[1]), int(date_split[2]))
-                queryset=queryset.filter(date__gte=date_start,date__lte =datetime.now())
-            except:
-                return response.Response({'detail':'year-mounth-day like ==>2021-12-2','condition':'mounth<=12 and day<=31'})
-                        
+            queryset=queryset.filter(date__gte=date.fromisoformat(datefirst),date__lte =dateend)
+        elif  datefirst is not None:
+            queryset=queryset.filter(date__gte=date.fromisoformat(datefirst))
+        elif  dateend is not None:
+            queryset=queryset.filter(date__lte =date.fromisoformat(dateend))                        
         return queryset
     @swagger_auto_schema(operation_description=docs.answer_list_get,tags=['ticketing'],manual_parameters =[params.date,params.question])
     def get(self, request, *args, **kwargs):
