@@ -1,14 +1,20 @@
+# restframework import 
 from  rest_framework.generics import ListCreateAPIView ,RetrieveUpdateDestroyAPIView
-from accounts.models import Customer
-from ticketing.serializers import QuestionTicketSerializer,AnswerTicketSerializer
-# Create your views here.
 from rest_framework import response,status
 from rest_framework.permissions import IsAuthenticated
+# ticketing app import
+from ticketing.serializers import QuestionTicketSerializer,AnswerTicketSerializer
+from ticketing.permissions import Ticketpermissions
 from ticketing.models import Ticket,TicketAnswer
 from ticketing import docs ,params
+# account app import
+from accounts.models import Customer
+
+# drf-ysg for swagger import
 from drf_yasg.utils import swagger_auto_schema
-from datetime import date,datetime
-from ticketing.permissions import Ticketpermissions
+# other app import
+from datetime import date
+# create view here
 class CreateQuestionView(ListCreateAPIView):
     permission_classes =[IsAuthenticated,Ticketpermissions]
     serializer_class = QuestionTicketSerializer
