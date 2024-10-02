@@ -22,12 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-2#0c$r@n2b!1lu8_me#drm7=p42s_u22fmwz^rxek3i6flz1+0'
 
-SECRET_KEY = config('SECRET_KEY')
+# SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = 'django-insecure-2#0c$r@n2b!1lu8_me#drm7=p42s_u22fmwz^rxek3i6flz1+0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool, default=False)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+# ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv(),defualt="127.0.0.0:8000")
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -94,12 +96,16 @@ REST_FRAMEWORK = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('name'),
-        'USER': config('user'),
-        'PASSWORD': config('PASSWORD'),
-        'HOST': config('host'),
-        'PORT': config('port'),
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'NAME': config('name'),
+        # 'USER': config('user'),
+        # 'PASSWORD': config('PASSWORD'),
+        # 'HOST': config('host'),
+        # 'PORT': config('port'),
+        'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
     }
 }
 
