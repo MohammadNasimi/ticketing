@@ -24,3 +24,7 @@ class TestBase(TestCase):
         self.token = data.get('access')
         
 
+    def change_binary_to_dict(self,binary_):
+        json_string = binary_.decode('utf-8')
+        data = json.loads(json_string)
+        return data
