@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 import json
 class TestBase(TestCase):
     
@@ -12,6 +13,7 @@ class TestBase(TestCase):
         self.password = 'testpassword'
         User = get_user_model()
         self.user = User.objects.create_user(self.username, password=self.password)
+        self.anonymous_user = AnonymousUser
         post_data ={
                 "username": self.username,
                 "password": self.password
@@ -28,3 +30,4 @@ class TestBase(TestCase):
         json_string = binary_.decode('utf-8')
         data = json.loads(json_string)
         return data
+    
