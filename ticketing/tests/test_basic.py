@@ -30,3 +30,4 @@ class TestBase(TestCase):
         json_string = binary_.decode('utf-8')
         data = json.loads(json_string)
         return data
+    
